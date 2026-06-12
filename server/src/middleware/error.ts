@@ -26,6 +26,16 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(400).json({ error: 'Validation failed', details: err.flatten().fieldErrors });
     return;
   }
+  if (
+    err instanceof SyntaxError &&
+    typeof err === 'object' &&
+    err !== null &&
+    'status' in err &&
+    err.status === 400
+  ) {
+    res.status(400).json({ error: 'Invalid JSON body' });
+    return;
+  }
   if (err instanceof HttpError) {
     res.status(err.status).json({ error: err.message });
     return;
