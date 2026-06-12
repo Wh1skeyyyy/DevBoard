@@ -1,4 +1,6 @@
 import type {
+  GitHubActivity,
+  GitHubRepository,
   Project,
   ProjectInput,
   Task,
@@ -77,4 +79,22 @@ export const api = {
     }),
   deleteTask: (taskId: number) =>
     request<void>(`/api/tasks/${taskId}`, { method: 'DELETE' }),
+  listRepositories: (projectId: number) =>
+    request<GitHubRepository[]>(`/api/projects/${projectId}/repositories`),
+  linkRepository: (projectId: number, url: string) =>
+    request<GitHubRepository>(`/api/projects/${projectId}/repositories`, {
+      method: 'POST',
+      body: JSON.stringify({ url }),
+    }),
+  deleteRepository: (projectId: number, repositoryId: number) =>
+    request<void>(
+      `/api/projects/${projectId}/repositories/${repositoryId}`,
+      { method: 'DELETE' },
+    ),
+  getRepositoryActivity: (repositoryId: number) =>
+    request<GitHubActivity>(`/api/repositories/${repositoryId}/activity`),
+  refreshRepository: (repositoryId: number) =>
+    request<GitHubActivity>(`/api/repositories/${repositoryId}/refresh`, {
+      method: 'POST',
+    }),
 };

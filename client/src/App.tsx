@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ProjectForm, TaskForm } from './components/Forms';
+import { GitHubPanel } from './components/GitHubPanel';
 import { Icon } from './components/Icon';
 import { Modal } from './components/Modal';
 import { ProjectSidebar } from './components/ProjectSidebar';
@@ -39,6 +40,7 @@ function App() {
   const [priorityFilter, setPriorityFilter] = useState<TaskPriority | 'all'>(
     'all',
   );
+  const [activeView, setActiveView] = useState<'tasks' | 'github'>('tasks');
   const [projectDialog, setProjectDialog] = useState<ProjectDialog | null>(null);
   const [taskDialog, setTaskDialog] = useState<TaskDialog | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
@@ -228,26 +230,35 @@ function App() {
           >
             <Icon className="size-5" name="menu" />
           </button>
-          <label className="flex min-w-0 max-w-md flex-1 items-center gap-2.5 rounded-2xl border border-line bg-panel px-4 py-2.5 text-muted shadow-sm focus-within:border-accent">
-            <Icon className="size-4 shrink-0" name="search" />
-            <span className="sr-only">Search tasks</span>
-            <input
-              className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70"
-              onChange={(event) => setTaskSearch(event.target.value)}
-              placeholder="Search tasks"
-              type="search"
-              value={taskSearch}
-            />
-          </label>
-          <button
-            className="ml-auto flex items-center gap-2 rounded-xl bg-accent px-3.5 py-2.5 text-sm font-extrabold text-white shadow-accent transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
-            disabled={!selectedProject}
-            onClick={() => setTaskDialog({ status: 'todo' })}
-            type="button"
-          >
-            <Icon className="size-4" name="plus" />
-            <span className="hidden sm:inline">New task</span>
-          </button>
+          {activeView === 'tasks' ? (
+            <>
+              <label className="flex min-w-0 max-w-md flex-1 items-center gap-2.5 rounded-2xl border border-line bg-panel px-4 py-2.5 text-muted shadow-sm focus-within:border-accent">
+                <Icon className="size-4 shrink-0" name="search" />
+                <span className="sr-only">Search tasks</span>
+                <input
+                  className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-muted/70"
+                  onChange={(event) => setTaskSearch(event.target.value)}
+                  placeholder="Search tasks"
+                  type="search"
+                  value={taskSearch}
+                />
+              </label>
+              <button
+                className="ml-auto flex items-center gap-2 rounded-xl bg-accent px-3.5 py-2.5 text-sm font-extrabold text-white shadow-accent transition hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-50 sm:px-4"
+                disabled={!selectedProject}
+                onClick={() => setTaskDialog({ status: 'todo' })}
+                type="button"
+              >
+                <Icon className="size-4" name="plus" />
+                <span className="hidden sm:inline">New task</span>
+              </button>
+            </>
+          ) : (
+            <div className="flex min-w-0 flex-1 items-center gap-2.5 text-sm font-bold text-muted">
+              <Icon className="size-4 shrink-0" name="github" />
+              <span className="truncate">Repository activity</span>
+            </div>
+          )}
         </header>
 
         <div className="mx-auto max-w-[94rem] px-4 py-6 sm:px-7 sm:py-8">
@@ -375,58 +386,100 @@ function App() {
                 ))}
               </section>
 
-              <section className="mt-8">
-                <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-accent">
-                      Task flow
-                    </p>
-                    <h2 className="mt-1 text-2xl font-black tracking-[-0.035em]">
-                      Keep the work moving
-                    </h2>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <select
-                      aria-label="Filter by status"
-                      className="rounded-xl border border-line bg-panel px-3 py-2 text-xs font-bold text-muted outline-none focus:border-accent"
-                      onChange={(event) =>
-                        setStatusFilter(event.target.value as TaskStatus | 'all')
-                      }
-                      value={statusFilter}
-                    >
-                      <option value="all">All statuses</option>
-                      <option value="todo">To do</option>
-                      <option value="in_progress">In progress</option>
-                      <option value="done">Done</option>
-                    </select>
-                    <select
-                      aria-label="Filter by priority"
-                      className="rounded-xl border border-line bg-panel px-3 py-2 text-xs font-bold text-muted outline-none focus:border-accent"
-                      onChange={(event) =>
-                        setPriorityFilter(
-                          event.target.value as TaskPriority | 'all',
-                        )
-                      }
-                      value={priorityFilter}
-                    >
-                      <option value="all">All priorities</option>
-                      <option value="high">High priority</option>
-                      <option value="medium">Medium priority</option>
-                      <option value="low">Low priority</option>
-                    </select>
-                  </div>
-                </div>
+              <div className="mt-7 flex w-full max-w-sm rounded-2xl border border-line bg-panel p-1 shadow-sm">
+                <button
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold transition ${
+                    activeView === 'tasks'
+                      ? 'bg-ink text-white shadow-sm'
+                      : 'text-muted hover:text-ink'
+                  }`}
+                  onClick={() => setActiveView('tasks')}
+                  type="button"
+                >
+                  <Icon className="size-4" name="tasks" />
+                  Tasks
+                </button>
+                <button
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold transition ${
+                    activeView === 'github'
+                      ? 'bg-ink text-white shadow-sm'
+                      : 'text-muted hover:text-ink'
+                  }`}
+                  onClick={() => setActiveView('github')}
+                  type="button"
+                >
+                  <Icon className="size-4" name="github" />
+                  GitHub
+                </button>
+              </div>
 
-                <TaskBoard
-                  loading={loadingTasks}
-                  onCreate={(status) => setTaskDialog({ status })}
-                  onDelete={(task) => setDeleteTarget({ kind: 'task', task })}
-                  onEdit={(task) => setTaskDialog({ status: task.status, task })}
-                  onStatusChange={(task, status) =>
-                    void changeTaskStatus(task, status)
-                  }
-                  tasks={filteredTasks}
-                />
+              <section className="mt-6">
+                {activeView === 'tasks' ? (
+                  <>
+                    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                      <div>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-accent">
+                          Task flow
+                        </p>
+                        <h2 className="mt-1 text-2xl font-black tracking-[-0.035em]">
+                          Keep the work moving
+                        </h2>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <select
+                          aria-label="Filter by status"
+                          className="rounded-xl border border-line bg-panel px-3 py-2 text-xs font-bold text-muted outline-none focus:border-accent"
+                          onChange={(event) =>
+                            setStatusFilter(
+                              event.target.value as TaskStatus | 'all',
+                            )
+                          }
+                          value={statusFilter}
+                        >
+                          <option value="all">All statuses</option>
+                          <option value="todo">To do</option>
+                          <option value="in_progress">In progress</option>
+                          <option value="done">Done</option>
+                        </select>
+                        <select
+                          aria-label="Filter by priority"
+                          className="rounded-xl border border-line bg-panel px-3 py-2 text-xs font-bold text-muted outline-none focus:border-accent"
+                          onChange={(event) =>
+                            setPriorityFilter(
+                              event.target.value as TaskPriority | 'all',
+                            )
+                          }
+                          value={priorityFilter}
+                        >
+                          <option value="all">All priorities</option>
+                          <option value="high">High priority</option>
+                          <option value="medium">Medium priority</option>
+                          <option value="low">Low priority</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <TaskBoard
+                      loading={loadingTasks}
+                      onCreate={(status) => setTaskDialog({ status })}
+                      onDelete={(task) =>
+                        setDeleteTarget({ kind: 'task', task })
+                      }
+                      onEdit={(task) =>
+                        setTaskDialog({ status: task.status, task })
+                      }
+                      onStatusChange={(task, status) =>
+                        void changeTaskStatus(task, status)
+                      }
+                      tasks={filteredTasks}
+                    />
+                  </>
+                ) : (
+                  <GitHubPanel
+                    key={selectedProject.id}
+                    projectId={selectedProject.id}
+                  />
+                )}
               </section>
             </>
           ) : (
