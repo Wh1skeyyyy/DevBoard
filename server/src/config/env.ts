@@ -8,6 +8,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  GITHUB_TOKEN: z.string().min(1, 'GITHUB_TOKEN is required'),
+  GITHUB_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(300),
 });
 
 const parsed = envSchema.safeParse(process.env);
